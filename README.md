@@ -14,8 +14,8 @@ npm run dev
 
 ## 🧩 Documentation
 
-- [Setup Guide](./docs/SETUP.md) – Environment setup, dependencies, and deployment  
-- [API Documentation](./docs/API_DOCS.md) – Endpoints, examples, and Swagger usage
+- [Setup Guide](./src/docs/SETUP.md) – Environment setup, dependencies, and deployment  
+- [API Documentation](./src/docs/API_DOCS.md) – Endpoints, examples, and Swagger usage
 
 ## 🚀 Features
 
