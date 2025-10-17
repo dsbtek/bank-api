@@ -16,8 +16,13 @@ import logger from './utils/logger';
 import { AppError } from './utils/AppError';
 import { errorHandler } from './middleware/errorHandler';
 import v1Routes from './routes/v1';
-
+import fs from "fs";
+import path from "path";
+import YAML from "yaml";
 const app = express();
+// Load YAML file
+const file = fs.readFileSync(path.join(__dirname, "./docs/swagger.yaml"), "utf8");
+const swaggerDocument = YAML.parse(file);
 
 // Security middleware
 app.use(helmet());
@@ -30,10 +35,14 @@ app.use(hpp());
 // Body parsing middleware
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+const baseYaml = YAML.parse(fs.readFileSync("./src/docs/swagger.yaml", "utf8"));
 
-// Swagger documentation
-const swaggerSpec = swaggerJsdoc(config.swagger);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+const swaggerSpec = swaggerJsdoc({
+  definition: baseYaml,
+  apis: ["./src/routes/**/*.ts"],
+});
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -44,6 +53,7 @@ app.get('/health', (req, res) => {
     environment: config.env
   });
 });
+
 
 // API routes
 app.use('/api/v1', v1Routes);

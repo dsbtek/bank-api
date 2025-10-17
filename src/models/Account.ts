@@ -6,7 +6,6 @@ const accountSchema = new Schema<IAccount>({
     type: String,
     required: true,
     unique: true,
-    length: 10,
     match: [/^\d{10}$/, 'Account number must be 10 digits']
   },
   userId: {
@@ -28,8 +27,8 @@ const accountSchema = new Schema<IAccount>({
   currency: {
     type: String,
     default: 'USD',
-    uppercase: true,
-    length: 3
+    enum: ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY'],
+    uppercase: true
   },
   isActive: {
     type: Boolean,
@@ -46,6 +45,10 @@ const accountSchema = new Schema<IAccount>({
   lastTransferReset: {
     type: Date,
     default: Date.now
+  },
+  version: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true
@@ -56,16 +59,24 @@ accountSchema.index({ userId: 1 });
 accountSchema.index({ accountNumber: 1 });
 accountSchema.index({ isActive: 1 });
 
-// Check if transfer is possible
+// Check if transfer is possible - FIXED VERSION
 accountSchema.methods.canTransfer = function(amount: number): boolean {
-  this.resetDailyTransferLimit();
+  // First reset the daily limit if needed
+  const now = new Date();
+  const lastReset = new Date(this.lastTransferReset);
+  
+  if (now.toDateString() !== lastReset.toDateString()) {
+    this.usedDailyTransferAmount = 0;
+    this.lastTransferReset = now;
+    // Note: Caller must save the document after this
+  }
   
   return this.isActive && 
          this.balance >= amount && 
          (this.usedDailyTransferAmount + amount) <= this.dailyTransferLimit;
 };
 
-// Reset daily transfer limit if it's a new day
+// Reset daily transfer limit if it's a new day - FIXED VERSION
 accountSchema.methods.resetDailyTransferLimit = function(): void {
   const now = new Date();
   const lastReset = new Date(this.lastTransferReset);
@@ -73,21 +84,14 @@ accountSchema.methods.resetDailyTransferLimit = function(): void {
   if (now.toDateString() !== lastReset.toDateString()) {
     this.usedDailyTransferAmount = 0;
     this.lastTransferReset = now;
+    // Note: Caller must save the document after this
   }
 };
 
 // Generate account number before saving
-accountSchema.pre('save', async function(next) {
-  if (this.isNew && !this.accountNumber) {
-    let accountNumber: string;
-    let exists: boolean;
-    
-    do {
-      accountNumber = Math.random().toString().slice(2, 12); // 10-digit number
-      exists = await mongoose.model('Account').exists({ accountNumber }) !== null;
-    } while (exists);
-    
-    this.accountNumber = accountNumber;
+accountSchema.pre('save', function(next) {
+  if (this.isModified()) {
+    this.version += 1;
   }
   next();
 });

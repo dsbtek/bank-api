@@ -85,10 +85,22 @@ export const transferSchemas = {
 export const accountSchemas = {
   createAccount: Joi.object({
     type: Joi.string().valid('savings', 'current', 'salary').default('savings'),
-    currency: Joi.string().length(3).uppercase().default('USD')
+    currency: Joi.string().length(3).uppercase().default('USD'),
+    initialBalance: Joi.number().precision(2).min(0).default(0),
+    accountNumber: Joi.string().pattern(/^\d{10}$/).optional()
   }),
 
   getBalance: Joi.object({
     accountId: Joi.string().hex().length(24).required()
+  }),
+
+  updateAccount: Joi.object({
+    type: Joi.string().valid('savings', 'current', 'salary'),
+    dailyTransferLimit: Joi.number().precision(2).min(0),
+    isActive: Joi.boolean()
+  }),
+
+  checkTransfer: Joi.object({
+    amount: Joi.number().precision(2).positive().required()
   })
 };

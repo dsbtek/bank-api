@@ -16,8 +16,11 @@ export enum TransactionStatus {
 export enum AccountType {
   SAVINGS = 'savings',
   CURRENT = 'current',
-  SALARY = 'salary'
+  SALARY = 'salary', 
+  BUSINESS = 'business'
 }
+
+export type Currency = 'USD' | 'EUR' | 'GBP' | 'JPY' | 'CAD' | 'AUD' | 'CHF' | 'CNY';
 
 export interface IUser extends Document {
   _id: ObjectId;
@@ -51,6 +54,7 @@ export interface IAccount extends Document {
   lastTransferReset: Date;
   createdAt: Date;
   updatedAt: Date;
+  version: number;
   
   canTransfer(amount: number): boolean;
   resetDailyTransferLimit(): void;

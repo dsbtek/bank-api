@@ -54,11 +54,3 @@
 7. **API Documentation**
    Once running, access Swagger documentation at:
    👉 [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
-
-## 🧠 Key Implementation Areas
-- Authentication (JWT + Refresh tokens)
-- Role-based authorization (Admin/Customer)
-- Secure fund transfers and history tracking
-- Caching and rate limiting (Redis)
-- Helmet, XSS, and Mongo sanitization
-- Docker-based deployment

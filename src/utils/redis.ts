@@ -66,9 +66,13 @@ class RedisClient {
     }
   }
 
-  async del(key: string): Promise<void> {
+  async del(key: string | string[]): Promise<void> {
     try {
-      await this.client.del(key);
+      if (Array.isArray(key)) {
+      if (key.length === 0) return ;
+      return await this.client.del(key);
+    }
+    return await this.client.del(key);
     } catch (error) {
       logger.error('Redis DEL error:', error);
       throw error;
@@ -99,6 +103,14 @@ class RedisClient {
       await this.client.quit();
       this.isConnected = false;
     }
+  }
+
+  getIsConnected(): boolean {
+    return this.isConnected;
+  }
+
+  async keys(pattern: string): Promise<string[]> {
+    return await this.client.keys(pattern);
   }
 }
 

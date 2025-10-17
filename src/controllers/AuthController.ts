@@ -1,10 +1,11 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { AuthService } from '../services/AuthService';
 import { AppError } from '../utils/AppError';
 import { AuthRequest } from '../types';
 
 export class AuthController {
-  static async signup(req: Request, res: Response): Promise<void> {
+  static async signup(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
     const { user, tokens } = await AuthService.signup(req.body);
 
     res.status(201).json({
@@ -22,9 +23,13 @@ export class AuthController {
         tokens
       }
     });
+    } catch (error) {
+      next(error);
+    }
   }
 
-  static async login(req: Request, res: Response): Promise<void> {
+  static async login(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
     const { user, tokens } = await AuthService.login(req.body);
 
     res.json({
@@ -41,9 +46,13 @@ export class AuthController {
         tokens
       }
     });
+    } catch (error) {
+      next(error);
+    }
   }
 
-  static async refreshToken(req: Request, res: Response): Promise<void> {
+  static async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
     const { refreshToken } = req.body;
     const tokens = await AuthService.refreshToken(refreshToken);
 
@@ -52,9 +61,13 @@ export class AuthController {
       message: 'Token refreshed successfully',
       data: tokens
     });
+  } catch (error) {
+    next(error);
+  }
   }
 
-  static async logout(req: AuthRequest, res: Response): Promise<void> {
+  static async logout(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
     const { refreshToken } = req.body;
     
     if (refreshToken) {
@@ -65,15 +78,23 @@ export class AuthController {
       success: true,
       message: 'Logout successful'
     });
+  } catch (error) {
+    next(error);
+  }
   }
 
-  static async getProfile(req: AuthRequest, res: Response): Promise<void> {
+  static async getProfile(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     // User is attached to request by auth middleware
+    try {
     res.json({
       success: true,
       data: {
         user: req.user
       }
     });
+  }
+  catch (error) {
+    next(error);
+  }
   }
 }
