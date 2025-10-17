@@ -25,7 +25,7 @@ export interface PaginationParams {
 }
 
 export interface PaginatedResponse<T> {
-// transactions?: ITransaction;
+transactions?: ITransaction[];
   data?: T[];
   pagination: {
     page: number;

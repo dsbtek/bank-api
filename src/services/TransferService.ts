@@ -70,7 +70,7 @@ export class TransferService {
     ]);
 
     return {
-      // transactions,
+      transactions,
       pagination: {
         page: pagination.page,
         limit: pagination.limit,
